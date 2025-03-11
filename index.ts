@@ -19,7 +19,6 @@ const scanAll = process.env.SCAN_ALL === '1';
 const delay = parseInt(process.env.DELAY || '3000');
 
 async function main() {
-  pool.connect();
   try {
     await bskyAuthenticate(agent, username, password);
     await bskyRun(agent, pool, undefined, { scanAll, delay });
@@ -27,7 +26,7 @@ async function main() {
   catch (e) {
     console.error(e);
   }
-  pool.end();
+  await pool.end();
   console.log('Done');
 }
 
