@@ -16,7 +16,11 @@ export async function downloadImage(url: string, filepath: string) {
   });
 }
 
-export function unlinkImage(filepath: string) {
+export async function downloadVideo(postUrl: string, filepath: string) {
+  
+}
+
+export function unlinkFile(filepath: string) {
   fs.unlinkSync(filepath);
 }
 

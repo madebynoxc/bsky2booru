@@ -1,32 +1,31 @@
 import { PostView } from '@atproto/api/dist/client/types/app/bsky/feed/defs';
 import { AppBskyEmbedImages, AppBskyEmbedRecordWithMedia, AppBskyEmbedVideo, AtpAgent } from '@atproto/api';
 import { Pool } from 'pg';
+import YTDlpWrap from 'yt-dlp-wrap';
 
 import { isPostProcessed, markPostAsProcessed, createTableIfNotExists } from "./db";
-import { downloadImage, unlinkImage, uploadToShimmie2 } from "./io";
+import { downloadImage, unlinkFile, uploadToShimmie2 } from "./io";
 
 function extractHashtags(text: string): string[] {
   const matches = text.match(/#([\p{L}\p{N}_]+)/gmu);
   return matches ? matches.map(tag => tag.replace('#', '')) : [];
 }
 
-function extractTextAndImages(post: PostView): { text: string; embeds: string[] } {
+function extractTextAndImages(post: PostView): { text: string; embeds: string[]; containsVideo: boolean } {
   // Extract text (if available)
   var text = (post.record as { text?: string })?.text || '';
 
   // Extract images if the post contains an image embed
   const embeds: string[] = [];
 
+  let containsVideo = false;
+
   if (post.embed && '$type' in post.embed) {
     if (post.embed.$type === 'app.bsky.embed.images#view') { // For image posts
       embeds.push(...(post.embed as AppBskyEmbedImages.View).images.map(img => img.fullsize));
     }
     else if (post.embed.$type === 'app.bsky.embed.video#view') { // For video posts (thumbnails only)
-      const video = post.embed as AppBskyEmbedVideo.View;
-      if (video.thumbnail)
-      {
-        embeds.push(video.thumbnail);
-      }
+      containsVideo = true;
     }
     else if (post.embed.$type === 'app.bsky.embed.recordWithMedia#view') { // For reposts
       const record = post.embed as AppBskyEmbedRecordWithMedia.View;
@@ -36,16 +35,12 @@ function extractTextAndImages(post: PostView): { text: string; embeds: string[] 
         embeds.push(...(record.media as AppBskyEmbedImages.View).images.map(img => img.fullsize));
       }
       else if (record.media.$type === 'app.bsky.embed.video#view') {
-        const video = post.embed as AppBskyEmbedVideo.View;
-        if (video.thumbnail)
-        {
-          embeds.push(video.thumbnail);
-        }
+        containsVideo = true;
       }
     }
   }
 
-  return { text, embeds };
+  return { text, embeds, containsVideo };
 }
 
 export async function bskyAuthenticate(agent : AtpAgent, username: string, password: string) {
@@ -54,7 +49,7 @@ export async function bskyAuthenticate(agent : AtpAgent, username: string, passw
   console.log('Authenticated as:', agent.session?.did);
 }
 
-export async function bskyRun(agent : AtpAgent, pool : Pool, cursor?: string, options?: { scanAll?: boolean, delay?: number }) {
+export async function bskyRun(agent : AtpAgent, pool : Pool, ytDlpWrap : YTDlpWrap, cursor?: string, options?: { scanAll?: boolean, delay?: number }) {
   if (!agent.session) {
     console.error('Not authenticated');
     return;
@@ -107,8 +102,23 @@ export async function bskyRun(agent : AtpAgent, pool : Pool, cursor?: string, op
           const pathname = `./temp/${filename}.${ext}`;
           await downloadImage(imageUrl, pathname);
           await uploadToShimmie2(pathname, blueskyUrl, tags);
-          unlinkImage(pathname);
+          unlinkFile(pathname);
         }
+      }
+
+      if (content.containsVideo) {
+        const filename = blueskyUri.split('/').pop();
+        const pathname = `./temp/${filename}.mp4`;
+        await ytDlpWrap.execPromise([
+          blueskyUri,
+          '-f',
+          'best',
+          '-o',
+          pathname,
+        ]);
+
+        await uploadToShimmie2(pathname, blueskyUrl, tags);
+        unlinkFile(pathname);
       }
     
       await markPostAsProcessed(pool, blueskyUri); // Save to DB

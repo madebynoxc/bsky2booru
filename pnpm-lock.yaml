@@ -23,6 +23,9 @@ importers:
       pg:
         specifier: ^8.13.3
         version: 8.13.3
+      yt-dlp-wrap:
+        specifier: ^2.3.12
+        version: 2.3.12
     devDependencies:
       '@types/express':
         specifier: ^5.0.0
@@ -302,6 +305,9 @@ packages:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
 
+  yt-dlp-wrap@2.3.12:
+    resolution: {integrity: sha512-P8fJ+6M1YjukyJENCTviNLiZ8mokxprR54ho3DsSKPWDcac489OjRiStGEARJr6un6ETS6goTn4CWl/b/rM3aA==}
+
   zod@3.24.2:
     resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
 
@@ -579,5 +585,7 @@ snapshots:
   undici-types@6.20.0: {}
 
   xtend@4.0.2: {}
+
+  yt-dlp-wrap@2.3.12: {}
 
   zod@3.24.2: {}
