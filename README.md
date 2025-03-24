@@ -1,11 +1,11 @@
 **Export your BlueSky likes to you local Shimmie2 or Danbooru instance.**
-Supports images, reposted images and video thumbnails. Post author will be added as `artist:bsky-handle` tag and text will be analyzed for any `#` words and add it as tags (Japanese characters are supported). An extra `bluesky` tag will be added.
+Supports images, reposted images and videos through yt-dlp. Post author will be added as `artist:bsky-handle` tag and text will be analyzed for any `#` words and add it as tags (Japanese characters are supported). An extra `bluesky` tag will be added.
 I recommend creating special account in your Shimmie for this purpose, so in a case you need to re-run, you can delete that account will all images.
 
 ## Requirements
 - BlueSky account.
 - PostgreSQL running on the network.
-- Shimmie2 or Danbooru running on the network (Danbooru hasn't been tested, but Shimmie uses the same API).
+- Shimmie2 or Danbooru running on the network (Danbooru hasn't been tested, but Shimmie Danbooru 1.0 API plugin).
 - If using Shimmie2, make sure that `Danbooru Client API` extension is enabled.
 
 ## First run
@@ -30,6 +30,7 @@ vim .env
 - `SHIMMIE_USERNAME` - Image upload username.
 - `SHIMMIE_API_KEY` - Image upload key/password.
 - `SCAN_ALL` - Determines if the script will continue scanning likes after encountering a familiar one. Leave it at `1` for now.
+- `YTDLPATH` - (optional) You may specify path to the yt-dlp binary for video downloads. Otherwise the latest release will be downloaded automatically.
 
 Run with:
 ```sh
@@ -43,4 +44,10 @@ Here is my configuration (every 6h):
 
 ```sh
 0 */6 * * * cd /home/noxc/bsky2booru && /home/noxc/.local/share/pnpm/pnpm start >> ./crontab.log 2>&1
+```
+
+If you ancounter issues with PATH, add it before any Cron entries, e.g.:
+
+```sh
+PATH=/home/noxc/.local/share/pnpm
 ```
