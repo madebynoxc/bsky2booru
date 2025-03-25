@@ -3,20 +3,24 @@ Supports images, reposted images and videos through yt-dlp. Post author will be 
 I recommend creating special account in your Shimmie for this purpose, so in a case you need to re-run, you can delete that account will all images.
 
 ## Requirements
+
 - BlueSky account.
 - PostgreSQL running on the network.
 - Shimmie2 or Danbooru running on the network (Danbooru hasn't been tested, but Shimmie Danbooru 1.0 API plugin).
 - If using Shimmie2, make sure that `Danbooru Client API` extension is enabled.
 
 ## First run
+
 If you don't have `pnpm` installed (`pnpm --version`) you can install it [here](https://pnpm.io/installation).
 
 After pulling this repository:
+
 ```sh
 pnpm i && pnpm build
 ```
 
 Make your own `.env` file from the template.
+
 ```sh
 cp .env.template .env
 vim .env
@@ -36,9 +40,17 @@ Run with:
 ```sh
 pnpm start
 ```
+
 The script will slowly go through all your likes and import them into Shimmie. It will log BlueSky URI of the post and any tags it found. In case of error, the script will log it and continue.
 
+If you are getting EACCES when spawning `yt-dlp`, make sure that it has correct permissions:
+
+```sh
+sudo chmod a+rx ./yt-dlp
+```
+
 ## Scheduled run
+
 After importing all your likes, switch `SCAN_ALL` flag to `0` and schedule to run this script using Cron. 
 Here is my configuration (every 6h):
 

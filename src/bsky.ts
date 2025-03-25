@@ -110,7 +110,7 @@ export async function bskyRun(agent : AtpAgent, pool : Pool, ytDlpWrap : YTDlpWr
         const filename = blueskyUri.split('/').pop();
         const pathname = `./temp/${filename}.mp4`;
         await ytDlpWrap.execPromise([
-          blueskyUri,
+          blueskyUrl,
           '-f',
           'best',
           '-o',

@@ -20,11 +20,14 @@ const username = process.env.BSKY_USERNAME!;
 const password = process.env.BSKY_PASSWORD!;
 const scanAll = process.env.SCAN_ALL === '1';
 const delay = parseInt(process.env.DELAY || '3000');
-const ytDlpPath = process.env.YTDLPATH || os.platform.name == 'win32' ? 'yt-dlp.exe' : './yt-dlp';
+const defaultYtDlpPath = os.platform() === 'win32' ? 'yt-dlp.exe' : 'yt-dlp';
+let ytDlpPath = process.env.YTDLPATH;
 
 async function main() {
-  if (!fs.existsSync(ytDlpPath)) {
-    await YTDlpWrap.downloadFromGithub(ytDlpPath);
+  if (!fs.existsSync(ytDlpPath || defaultYtDlpPath)) {
+    console.log('Downloading yt-dlp from Github...');
+    await YTDlpWrap.downloadFromGithub();
+    ytDlpPath = undefined; // Using the default path
   }
 
   const ytDlpWrap = new YTDlpWrap(ytDlpPath);
