@@ -109,16 +109,19 @@ export async function bskyRun(agent : AtpAgent, pool : Pool, ytDlpWrap : YTDlpWr
       if (content.containsVideo) {
         const filename = blueskyUri.split('/').pop();
         const pathname = `./temp/${filename}.mp4`;
-        await ytDlpWrap.execPromise([
-          blueskyUrl,
-          '-f',
-          'best',
-          '-o',
-          pathname,
-        ]);
+        try {
+          await ytDlpWrap.execPromise([
+            blueskyUrl,
+            '-o',
+            pathname,
+          ]);
 
-        await uploadToShimmie2(pathname, blueskyUrl, tags);
-        unlinkFile(pathname);
+          await uploadToShimmie2(pathname, blueskyUrl, tags);
+          unlinkFile(pathname);
+        } catch (e) {
+          console.error('Failed to download video:', blueskyUri);
+          console.error(e);
+        }
       }
     
       await markPostAsProcessed(pool, blueskyUri); // Save to DB
